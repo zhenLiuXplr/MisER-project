@@ -24,7 +24,7 @@ class CustomHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
 
 
 """
-The script is used to import MisSER package. 
+The script is used to import MisER package. 
 Run run_multiprocess function to find and fix small-exon-missed reads.
 """
 
@@ -46,7 +46,7 @@ def main():
     # optional arguments
     parser.add_argument(
         "-v", "--version", help="Print version and exit.",
-        action="version", version="MisSER {0}".format(VERSION)
+        action="version", version="MisER {0}".format(VERSION)
     )
     parser.add_argument(
         "-c", "--coreNum", help="The number of cpu cores we used.",

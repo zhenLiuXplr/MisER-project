@@ -4,7 +4,7 @@ import codecs
 with open("README.md", "r", encoding="utf-8") as fh:
 	long_description = fh.read()
 
-exec(codecs.open("MisSER/version.py").read())
+exec(codecs.open("MisER/version.py").read())
 
 
 INSTALL_REQUIRES = [
@@ -15,24 +15,24 @@ INSTALL_REQUIRES = [
 ]
 
 setuptools.setup(
-    name='MisSER',
+    name='MisER',
     version=VERSION,
     author='Zhen Liu',
-    author_email='liuzhen2018@sibs.ac.cn',
+    author_email='liuzhen_sirius@outlook.com',
     description='Find and fix missed small exons.',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/zhenLiuExplr/MisSER-project',
+    url='https://github.com/zhenLiuXplr/MisER-project',
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX :: Linux",
     ],
-    package_dir={"MisSER": "MisSER"},
+    package_dir={"MisER": "MisER"},
     install_requires=INSTALL_REQUIRES,
     python_requires='>=3',
     entry_points={
-        'console_scripts': ['MisSER=MisSER.run_misser:main',],
+        'console_scripts': ['MisER=MisER.run_miser:main',],
     }
 )

@@ -1,4 +1,4 @@
-# MisSER-project
+# MisER-project
 An annotation based method to find and fix small exons missed alignment defects in Nanopore long reads.
 
 <img src="examples/pictures/ex1.png" width=800>
@@ -6,16 +6,16 @@ The example plot above show the misaligned exon in the middle is find by compair
 
 ### INSTALLATION
 
-`pip install MisSER`
+`pip install MisER`
 
 Upgrade to a newer version using:
-`pip install MisSER --upgrade`
+`pip install MisER --upgrade`
 
 The package is written for python3
 
 ### INPUT
 
-MisSER requires four essential arguments.
+MisER requires four essential arguments.
 - BAM file
 - genome reference fasta (with index fai in the same directory)
 - transcript annotation in BED12 format
@@ -27,7 +27,7 @@ MisSER requires four essential arguments.
 
 ### USAGE
 ```
-MisSER [-h] [-v] [-c N] [-s N] [-d float] [-f N] [--strandSpecific]
+MisER [-h] [-v] [-c N] [-s N] [-d float] [-f N] [--strandSpecific]
               [--allTranscripts] [--fixFlankLen] [--debugMode] [--setTag]
               [-o file | --onlyRegion]
               inBam genomeFasta annotBed outRegion
@@ -59,7 +59,7 @@ optional arguments:
 
 ### NOTES
 <img src="examples/pictures/illustrator.png" width=400>
-Misaligned exons are absent from annotated position and connected to the neighbour exon as extra protruding parts with high error rate. MisSER will first select all introns on reads which overlap with annotated exons and set borders on the suspected misaligned regions. Then MisSER tries to realign the read sequence in region and compare the alignment score before and after realignment. If alignment score improves, the region will be assigned as misaligned region.
+Misaligned exons are absent from annotated position and connected to the neighbour exon as extra protruding parts with high error rate. MisER will first select all introns on reads which overlap with annotated exons and set borders on the suspected misaligned regions. Then MisER tries to realign the read sequence in region and compare the alignment score before and after realignment. If alignment score improves, the region will be assigned as misaligned region.
 
 - **Delta length** As the picture show above, *Delta length* is defined as the extra bases between reads flank exons and reference flank exons. Intuitively, it is the bases count in the extra protruding parts. We find the reads introns if the intron overlaps with the annotated exon, and then check whether the *Delta length* close to the *exon length*. It is easy to think that *Delta length* should be close to the *Exon length* if they come from the annotated exon.
 - **Flank length** In order to define the range of the realign region. we set the region start = min(annoted splice site, read splice site) - *Flank length* and the region end = max(annoted splice site, read splice site) + *Flank length*
@@ -73,9 +73,9 @@ ATTENTION: the original score does not refer to the AS field in BAM if provided.
 
 ### EXAMPLE USAGE
 ```bash
-git clone https://github.com/zhenLiuExplr/fixalign-project
+git clone https://github.com/zhenLiuXplr/MisER-project
 cd examples
-MisSER ex.bam ex.fa ex_annotation.bed ex_realign_region -o realn.bam
+MisER ex.bam ex.fa ex_annotation.bed ex_realign_region -o realn.bam
 ```
 Be careful that chromosome in annotBed, genomeFasta and inBam should have same naming style (All in UCSC style like "chr1" or in Ensembl style like "1"). Inconsistent naming style will lead to failed judgement.
 
@@ -84,7 +84,7 @@ Be careful that chromosome in annotBed, genomeFasta and inBam should have same n
 - Wu Wei and Chenchen Zhu for advising
 
 ### CONTRIBUTING
-Welcome for all suggestions, bug reports, feature request and contributions. You can leave an [issue](https://github.com/zhenLiuExplr/MisSER-project/issues) or open a pull request.
+Welcome for all suggestions, bug reports, feature request and contributions. You can leave an [issue](https://github.com/zhenLiuXplr/MisER-project/issues) or open a pull request.
 
 ### CITATION
 If you use this tool, please consider citing our [publication]()
