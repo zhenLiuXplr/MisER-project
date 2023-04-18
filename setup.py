@@ -9,7 +9,7 @@ exec(codecs.open("MisER/version.py").read())
 
 INSTALL_REQUIRES = [
     'numpy',
-    'pandas',
+    'pandas<2.0.0',
     'pysam',
     'parasail>=1.1.17'
 ]
