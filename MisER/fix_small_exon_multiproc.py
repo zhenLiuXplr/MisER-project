@@ -417,6 +417,7 @@ def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, an
             out_bam_path_proc, "wb", template=ori_bam)
     filter_list = []
     read_i = 0  # 0 based
+    spliced_read_num = 0
     total_intron = 0
     misaligned_read_num = 0
     misaligned_intron_num = 0
@@ -430,6 +431,8 @@ def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, an
             if not only_region:
                 realign_bam.write(read)
             read_i += 1
+            if read.cigarstring is not None and "N" in read.cigarstring:
+                spliced_read_num += 1
             continue
         read_miss_exon_flag = False
         read_fix_flag = False
@@ -497,12 +500,14 @@ def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, an
                     read.set_tag('fr', fix_region_num, 'i')
             realign_bam.write(read)
         read_i += 1
+        if read.cigarstring is not None and "N" in read.cigarstring:
+            spliced_read_num += 1
         total_intron += read_block.introns["intron_num"]
         if read_miss_exon_flag:
             misaligned_read_num += 1
         if read_fix_flag:
             fix_read_num += 1
-    stat_dict = {"read_count": read_i, "total_intron": total_intron,
+    stat_dict = {"read_count": read_i, "spliced_read_num": spliced_read_num, "total_intron": total_intron,
                  "misaligned_read_num": misaligned_read_num,
                  "misaligned_intron_num": misaligned_intron_num,
                  "fix_read_num": fix_read_num, "fix_intron_num": fix_intron_num}
@@ -545,6 +550,7 @@ def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_b
             out_bam_path_proc, "wb", template=ori_bam)
     filter_list = []
     read_i = 0  # 0 based
+    spliced_read_num = 0
     total_intron = 0
     misaligned_read_num = 0
     misaligned_intron_num = 0
@@ -559,6 +565,8 @@ def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_b
                 if not only_region:
                     realign_bam.write(read)
                 read_i += 1
+                if read.cigarstring is not None and "N" in read.cigarstring:
+                    spliced_read_num += 1
                 continue
             read_miss_exon_flag = False
             read_fix_flag = False
@@ -628,6 +636,8 @@ def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_b
                         read.set_tag('fr', fix_region_num, 'i')
                 realign_bam.write(read)
             read_i += 1
+            if read.cigarstring is not None and "N" in read.cigarstring:
+                spliced_read_num += 1
             total_intron += read_block.introns["intron_num"]
             if read_miss_exon_flag:
                 misaligned_read_num += 1
@@ -637,7 +647,7 @@ def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_b
             logging.exception(e)
             error_case += 1
             error_bam.write(read)
-    stat_dict = {"read_count": read_i, "total_intron": total_intron,
+    stat_dict = {"read_count": read_i, "spliced_read_num": spliced_read_num, "total_intron": total_intron,
                  "misaligned_read_num": misaligned_read_num,
                  "misaligned_intron_num": misaligned_intron_num,
                  "fix_read_num": fix_read_num, "fix_intron_num": fix_intron_num}
@@ -668,6 +678,7 @@ def run_multiprocess(
     filter_list = []
     if not only_region:
         out_bam_list = []
+    spliced_read_num = 0
     total_intron = 0
     misaligned_read_num = 0
     misaligned_intron_num = 0
@@ -712,6 +723,7 @@ def run_multiprocess(
         filter_list.extend(res_dict["filter_list"])
         if not only_region:
             out_bam_list.append(res_dict["out_bam_path_proc"])
+        spliced_read_num += res_dict["stat_dict"]["spliced_read_num"]
         total_intron += res_dict["stat_dict"]["total_intron"]
         misaligned_read_num += res_dict["stat_dict"]["misaligned_read_num"]
         misaligned_intron_num += res_dict["stat_dict"]["misaligned_intron_num"]
@@ -733,33 +745,26 @@ def run_multiprocess(
     end_time = time.process_time()
     end_time2 = time.time()
     print("Input BAM information:")
-    print("\tTotal number of reads:", read_count)
-    print("\tTotal number of introns:", total_intron)
-    print("The result of finding misaligned exons:")
-    if read_count == 0:
-        print("\tThe number of misaligned reads:", misaligned_read_num)
-    else:
-        print("\tThe number of misaligned reads: {0}\tratio: {1:.2f}%".format(
-            misaligned_read_num, misaligned_read_num/read_count*100
-        ))
-    if total_intron == 0:
-        print("\tThe number of misaligned introns:", misaligned_intron_num)
-    else:
-        print("\tThe number of misaligned introns: {0}\tratio: {1:.2f}%".format(
-            misaligned_intron_num, misaligned_intron_num/total_intron*100
-        ))
-    print("The result of realignment:")
-    if misaligned_read_num == 0:
-        print("\tThe number of fixed reads:", fix_read_num)
-    else:
-        print("\tThe number of fixed reads: {0}\tratio to misaligned reads: {1:.2f}%".format(
-            fix_read_num, fix_read_num/misaligned_read_num*100
-        ))
-    if misaligned_intron_num == 0:
-        print("\tThe number of fixed introns:", fix_intron_num)
-    else:
-        print("\tThe numberr of fixed introns: {0}\tratio to misaligned introns: {1:.2f}%".format(
-            fix_intron_num, fix_intron_num/misaligned_intron_num*100
-        ))
+    print("\tTotal number of read alignment records (equal to \"samtools view -c bam\"):", read_count)
+    print("\tTotal number of spliced read alignment records (containing \"N\" in CIGAR strings):", spliced_read_num)
+    print("\tTotal number of intron regions on read alignment records:", total_intron)
+    print("The result of finding potential misaligned regions (PMRs):")
+    print("\tThe number of PMRs:", misaligned_intron_num)
+    if total_intron != 0:
+        print("\t\tPercentage to total number of intron regions: {0:.2f}%".format(misaligned_intron_num/total_intron*100))
+    print("\tThe number of read alignment records containing PMRs:", misaligned_read_num)
+    if read_count != 0:
+        print("\t\tPercentage to total number of read alignment records: {0:.2f}%".format(misaligned_read_num/read_count*100))
+    if spliced_read_num != 0:
+        print("\t\tPercentage to total number of spliced read alignment records: {0:.2f}%".format(misaligned_read_num/spliced_read_num*100))
+    print("The result of realignment (judged as misaligned cases):")
+    print("\tThe number of fixed PMRs:", fix_intron_num)
+    if total_intron != 0:
+        print("\t\tPercentage to total number of intron regions: {0:.2f}%".format(fix_intron_num/total_intron*100))
+    print("\tThe number of fixed read alignment records:", fix_read_num)
+    if read_count != 0:
+        print("\t\tPercentage to total number of read alignment records: {0:.2f}%".format(fix_read_num/read_count*100))
+    if spliced_read_num != 0:
+        print("\t\tPercentage to total number of spliced read alignment records: {0:.2f}%".format(fix_read_num/spliced_read_num*100))
     print("Main process time used: {:.2f}s".format(end_time - start_time))
     print("Time used: {:.2f}s".format(end_time2 - start_time2))
