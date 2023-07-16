@@ -401,7 +401,7 @@ def realign_read(read, read_cigar, realign_ss, ref_fa, score_matrix):
 
 def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, annot_exon,
              small_exon_size=80, flank_len=20, ignore_strand=True, set_tag=True,
-             delta_ratio_thd=0.5, simplify=True, float_flank_len=False, only_region=False):
+             delta_ratio_thd=0.5, simplify=True, float_flank_len=False, only_region=False, random_str="0000000000"):
     """
     The function is used to find and fix small exon in one process.
     The proc_region is a three elements dict. {proc_id, start_read_id, end_read_id}
@@ -418,7 +418,6 @@ def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, an
     start_read_id = proc_region["start_read_id"]
     end_read_id = proc_region["end_read_id"]
     if not only_region:
-        random_str = generate_random_string(8)
         out_bam_path_proc = out_bam_path + ".tmp{0}_thread{1}.bam".format(random_str, proc_id)
         realign_bam = pysam.AlignmentFile(
             out_bam_path_proc, "wb", template=ori_bam)
@@ -529,7 +528,7 @@ def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, an
 
 def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, annot_exon,
                    small_exon_size=80, flank_len=20, ignore_strand=True, set_tag=True,
-                   delta_ratio_thd=0.5, simplify=True, float_flank_len=False, only_region=False):
+                   delta_ratio_thd=0.5, simplify=True, float_flank_len=False, only_region=False, random_str="0000000000"):
     """
     The function is used to find and fix small exon in one process.
     The proc_region is a three elements dict. {proc_id, start_read_id, end_read_id}
@@ -539,7 +538,6 @@ def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_b
     score_matrix = parasail.matrix_create("ACGT", 1, -1)
     ori_bam = pysam.AlignmentFile(ori_bam_path, "rb")
     # define a bam to record the reads with error
-    random_str = generate_random_string(8)
     error_bam_path = ori_bam_path+".tmp{0}_thread{1}_err.bam".format(random_str, proc_id)
     error_bam = pysam.AlignmentFile(
         error_bam_path, "wb", template=ori_bam)
@@ -711,10 +709,11 @@ def run_multiprocess(
     #         only_region=only_region
     #     )
     #     return res_dict
+    random_str = generate_random_string(10)
     con_args = (
         ori_bam_path, out_bam_path, ref_fa_path, annot_bed, annot_exon,
         small_exon_size, flank_len, ignore_strand, set_tag,
-        delta_ratio_thd, simplify, float_flank_len, only_region
+        delta_ratio_thd, simplify, float_flank_len, only_region, random_str
     )
     pool = mp.Pool(processes=nprocess)
     if debug_mode:
