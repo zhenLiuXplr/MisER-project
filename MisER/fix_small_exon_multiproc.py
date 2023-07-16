@@ -14,6 +14,8 @@ import time
 import warnings
 import os
 import logging
+import random
+import string
 
 import numpy as np
 import pandas as pd
@@ -37,6 +39,9 @@ def groupby_unsorted(seq, key_fun=lambda x: x):
     for key, idxs in indexs_dict.items():
         yield key, [seq[i] for i in idxs]
 
+def generate_random_string(length=8):
+    c = string.ascii_letters + string.digits
+    return ''.join(random.choice(c) for i in range(length))
 
 def parse_bed(bed_path):
     """
@@ -393,6 +398,7 @@ def realign_read(read, read_cigar, realign_ss, ref_fa, score_matrix):
     return new_cigar, increase_score
 
 
+
 def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, annot_exon,
              small_exon_size=80, flank_len=20, ignore_strand=True, set_tag=True,
              delta_ratio_thd=0.5, simplify=True, float_flank_len=False, only_region=False):
@@ -412,7 +418,8 @@ def find_fix(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_bed, an
     start_read_id = proc_region["start_read_id"]
     end_read_id = proc_region["end_read_id"]
     if not only_region:
-        out_bam_path_proc = out_bam_path + ".tmp{0}".format(proc_id)
+        random_str = generate_random_string(8)
+        out_bam_path_proc = out_bam_path + ".tmp{0}_thread{1}.bam".format(random_str, proc_id)
         realign_bam = pysam.AlignmentFile(
             out_bam_path_proc, "wb", template=ori_bam)
     filter_list = []
@@ -532,7 +539,8 @@ def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_b
     score_matrix = parasail.matrix_create("ACGT", 1, -1)
     ori_bam = pysam.AlignmentFile(ori_bam_path, "rb")
     # define a bam to record the reads with error
-    error_bam_path = ori_bam_path+".tmp{0}".format(proc_id)+"_err"
+    random_str = generate_random_string(8)
+    error_bam_path = ori_bam_path+".tmp{0}_thread{1}_err.bam".format(random_str, proc_id)
     error_bam = pysam.AlignmentFile(
         error_bam_path, "wb", template=ori_bam)
     error_case = 0
@@ -545,7 +553,7 @@ def find_fix_debug(proc_region, ori_bam_path, out_bam_path, ref_fa_path, annot_b
     start_read_id = proc_region["start_read_id"]
     end_read_id = proc_region["end_read_id"]
     if not only_region:
-        out_bam_path_proc = out_bam_path + ".tmp{0}".format(proc_id)
+        out_bam_path_proc = out_bam_path + ".tmp{0}_thread{1}.bam".format(random_str, proc_id)
         realign_bam = pysam.AlignmentFile(
             out_bam_path_proc, "wb", template=ori_bam)
     filter_list = []
