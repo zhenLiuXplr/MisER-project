@@ -1,4 +1,4 @@
-# MisER-project
+![image](https://github.com/zhenLiuXplr/MisER-project/assets/47103400/5ce3a705-e343-417d-8034-9d917968238c)![image](https://github.com/zhenLiuXplr/MisER-project/assets/47103400/9676681a-ef7d-4bcb-8698-4f3faeb583b5)# MisER-project
 An annotation based method to find and fix small exons missed alignment defects in Nanopore long reads.
 
 <img src="examples/pictures/ex1.png" width=800>
@@ -34,7 +34,7 @@ MisER [-h] [-v] [-c N] [-s N] [-d float] [-f N] [--strandSpecific]
 
 positional arguments:
   inBam                 Input original bam file.
-  genomeFasta           Reference genome fasta file, with fai index under the same directory.
+  genomeFasta           Reference genome FASTA file, with fai index under the same directory.
   annotBed              Annotated transcripts file in BED12 format.
   outRegion             Output Region file, regions contain missed small exons.
 
@@ -78,6 +78,42 @@ cd examples
 MisER ex.bam ex.fa ex_annotation.bed ex_realign_region -o realn.bam
 ```
 Be careful that chromosome in annotBed, genomeFasta and inBam should have same naming style (All in UCSC style like "chr1" or in Ensembl style like "1"). Inconsistent naming style will lead to failed judgement.
+
+### Using Short-read data for novel microexon detection
+To detect novel microexons in long-read sequencing data of not-well-annotated genomes, high-accuracy short-read RNA-seq can serve as a viable approach to acquire transcript annotations, using genome mapping at first and then transcript assembly, such as `STAR` (for genome mapping) and `Cufflinks` (for transcript assembly). These assembled transcripts can be utilized as annotations for MisER and correcting the misaligned small exons in long-read sequencing data.
+
+To install STAR and Cufflinks, user can use conda package management system:
+```
+conda create -n env_name -c bioconda star cufflinks
+source activate env_name
+```
+For short-read genome mapping (STAR):
+```
+# Build reference genome index
+STAR --runMode genomeGenerate --runThreadN <number of threads> --genomeDir <genome index output directory> --genomeFastaFiles <reference genome FASTA file> --sjdbGTFfile <annotated transcripts GTF files, optional>
+# Mapping reads to genome
+STAR --genomeDir <genome index directory> --readFilesIn <short-read FASTQ files, for single-end: reads.fq; for paired-end: reads1.fq reads2.fq> --outSAMtype BAM SortedByCoordinate --outFileNamePrefix <output files prefix>
+```
+STAR will generate a BAM file `prefixAligned.sortedByCoord.out.bam` which can be used in transcript assembly (Cufflinks):
+```
+Cufflinks -o <output directory> -p <number of thread> prefixAligned.sortedByCoord.out.bam
+```
+Cufflinks will generate a transcript annotation `transcripts.gtf` in GTF format.
+
+For converting GTF format into BED12 format, which is required for MisER `annotBed`, you can use the R package `rtracklayer`:
+```
+# Install r-base and rtracklayer
+conda install -c bioconda bioconductor-rtracklayer
+# Enter the R console
+R
+# In R console
+library("rtracklayer")
+gtf = import("transcripts.gtf")
+exon = subset(gtf, type == "exon")
+tx = asBED(split(exon, exon$transcript_id))
+export(tx, "transcripts.bed", format="bed")
+```
+The generated `transcripts.bed` file (BED12 format) can be used as `annotBed` in MisER.
 
 ### ACKNOWLEDGMENTS/CONTRIBUTORS
 - Zhen Liu for building and maintance
