@@ -92,7 +92,7 @@ For short-read genome mapping (STAR):
 # Build reference genome index
 STAR --runMode genomeGenerate --runThreadN <number of threads> --genomeDir <genome index output directory> --genomeFastaFiles <reference genome FASTA file> --sjdbGTFfile <annotated transcripts GTF files, optional>
 # Mapping reads to genome
-STAR --genomeDir <genome index directory> --readFilesIn <short-read FASTQ files, for single-end: reads.fq; for paired-end: reads1.fq reads2.fq> --outSAMtype BAM SortedByCoordinate --outFileNamePrefix <output files prefix>
+STAR --runMode genomeGenerate --genomeDir <genome index directory> --readFilesIn <short-read FASTQ files, for single-end: reads.fq; for paired-end: reads1.fq reads2.fq> --outSAMtype BAM SortedByCoordinate --outFileNamePrefix <output files prefix>
 ```
 STAR will generate a BAM file `prefixAligned.sortedByCoord.out.bam` which can be used in transcript assembly (Cufflinks):
 ```
@@ -114,6 +114,10 @@ tx = asBED(split(exon, exon$transcript_id))
 export(tx, "transcripts.bed", format="bed")
 ```
 The generated `transcripts.bed` file (BED12 format) can be used as `annotBed` in MisER.
+
+For more information of `STAR` and `Cufflinks`, please visit the websites:
+https://github.com/alexdobin/STAR;
+http://cole-trapnell-lab.github.io/cufflinks/cufflinks/index.html
 
 ### ACKNOWLEDGMENTS/CONTRIBUTORS
 - Zhen Liu for building and maintance
