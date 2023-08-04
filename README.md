@@ -1,4 +1,4 @@
-![image](https://github.com/zhenLiuXplr/MisER-project/assets/47103400/5ce3a705-e343-417d-8034-9d917968238c)![image](https://github.com/zhenLiuXplr/MisER-project/assets/47103400/9676681a-ef7d-4bcb-8698-4f3faeb583b5)# MisER-project
+# MisER-project
 An annotation based method to find and fix small exons missed alignment defects in Nanopore long reads.
 
 <img src="examples/pictures/ex1.png" width=800>
